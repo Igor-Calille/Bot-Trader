@@ -1,0 +1,56 @@
+Usando RSI, Bollunger e RadomForestRegressor
+Valor inicial da carteira: $10000
+
+sem media movel
+Acurácia do sinal de compra e venda: 0.91
+Valor final da carteira: 40451.79
+Retorno do investimento: 304.52%
+
+----------------------------------------------------
+
+media movel 30
+0.92
+41733.58
+317%
+
+media movel 60
+0.89
+36034.18
+260.34%
+
+media movel 30 e 60
+0.91
+39859.90
+298.60%
+
+----------------------------------------------------
+
+media movel 17
+0.91
+37613.45
+276.13%
+
+media movel 72
+0.93
+39803.99
+298.04%
+
+media movel 17 e 72
+0.92
+426686.28
+326.86%
+
+
+testar com 20,50,200
+----------------------------------------------------
+
+0.9
+127137
+1171.37%
+
+
+0.92
+42686.28
+326.86%
+
+
