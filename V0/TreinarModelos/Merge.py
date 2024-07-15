@@ -4,12 +4,13 @@ from typing import List, Union
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, TimeSeriesSplit, GridSearchCV
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 import matplotlib.pyplot as plt
 
 from TreinarModelos.IndicadoresMercado import Indicadores
 from TreinarModelos.Test import Test
-from TreinarModelos.MLModels import using_RandomForestRegressor, using_LinearRidge
+from TreinarModelos.MLModels import using_RandomForestRegressor, using_LinearRidge, using_LNN
 
 
 #stocks = pd.read_csv('V0/AAPL_2020-01-01__2024-01-01.csv')
@@ -24,11 +25,12 @@ class BOTS:
             model = using_RandomForestRegressor.GridSearchCV_RandomForestRegressor(X, y)
         elif model_type == 'RandomForestRegressor_normal_split':
             model = using_RandomForestRegressor.normal_split_RandomForestRegressor(X, y)
-
         elif model_type == 'LinearRidge_GridSearchCV':
             model = using_LinearRidge.GridSearchCV_LinearRidge(X, y)
         elif model_type == 'LinearRidge_normal_split':
-            model = using_LinearRidge.normal_split(X, y)
+            model = using_LinearRidge.normal_split_LinearRidge(X, y)
+        elif model_type == 'LNN_LSTM':
+            model = using_LNN.LNN_LSTM(X, y)
 
         else:
             raise ValueError('Invalid model type. Please choose a valid model type.')
@@ -81,9 +83,24 @@ class BOTS:
             features.append('Bollinger_High')
             features.append('Bollinger_Low')
 
+
+        # Lag Features
+        lags = [1, 2, 3]
+        for lag in lags:
+            stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
+            features.append(f'lag_{lag}')
+
+        # Remove valores nulos
         stocks.dropna(inplace=True)
-        X = stocks[features]
-        y = stocks['target']
+
+        # Escalonamento dos dados
+        scaler = StandardScaler()
+        X = scaler.fit_transform(stocks[features])
+        y = stocks['target'].values
+
+
+        #X = stocks[features]
+        #y = stocks['target']
 
 
         #Treinamento do modelo de acordo com o modelo escolhido

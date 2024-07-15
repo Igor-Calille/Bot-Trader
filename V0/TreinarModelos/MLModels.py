@@ -1,9 +1,12 @@
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
-
 from sklearn.model_selection import train_test_split, TimeSeriesSplit, GridSearchCV
-
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM, Dropout, GRU, Bidirectional
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
 
 class using_RandomForestRegressor():
     def __init__(self):
@@ -55,3 +58,43 @@ class using_LinearRidge():
         best_model = gsearch.best_estimator_
 
         return best_model
+    
+class using_LNN():
+    def __init__(self):
+        pass
+
+    def LNN_LSTM(X, y):
+
+        # Verifica se a GPU está disponível
+        if tf.config.experimental.list_physical_devices('GPU'):
+            print("\n----------------Treinando com GPU----------------\n")
+        else:
+            print("\n----------------Treinando com CPU----------------\n")
+            
+        X = X.reshape((X.shape[0], X.shape[1], 1))  # Ajusta o formato para (samples, timesteps, features)
+
+        seq_length = X.shape[1]  # Determina dinamicamente o comprimento da sequência
+        input_dim = X.shape[2]   # Número de características (dimensão do input)
+
+        model = Sequential()
+        model.add(Bidirectional(LSTM(300, activation='tanh', input_shape=(seq_length, input_dim), return_sequences=True, kernel_regularizer='l2')))
+        model.add(Dropout(0.2))
+        model.add(Bidirectional(LSTM(300, activation='tanh', kernel_regularizer='l2')))
+        model.add(Dropout(0.2))
+        model.add(Dense(1))
+
+        optimizer = Adam(learning_rate=0.001)
+        model.compile(optimizer=optimizer, loss='mse')
+
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.0001)
+        early_stopping = EarlyStopping(monitor='val_loss', patience=10)
+
+        tscv = TimeSeriesSplit(n_splits=5)
+
+        for train_index, val_index in tscv.split(X):
+            X_train, X_val = X[train_index], X[val_index]
+            y_train, y_val = y[train_index], y[val_index]
+
+            model.fit(X_train, y_train, epochs=500, batch_size=32, validation_data=(X_val, y_val), callbacks=[reduce_lr, early_stopping])
+
+        return model

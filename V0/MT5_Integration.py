@@ -25,7 +25,6 @@ to_date = datetime.now(pytz.utc)
 #Obter as mpetricas dos stocks
 rates = mt5.copy_rates_range(symbol, mt5.TIMEFRAME_D1, from_date, to_date)
 
-
 if rates is None:
     print('Falha no acesso do history data. Erro=',mt5.last_error())
 else:
@@ -40,7 +39,7 @@ rates_df = rates_df.rename(columns={'time': 'date'})
 
 
 
-predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[17,72], rsi=True, bollinger=True)
+predicted_stocks = BOTS.BOT_main(rates_df, 'LNN_LSTM', media_movel=[17,72], rsi=True, bollinger=True)
 #BOTS.testing(predicted_stocks)
 
 
