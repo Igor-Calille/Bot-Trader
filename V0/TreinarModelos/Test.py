@@ -1,4 +1,7 @@
 import numpy as np
+import pandas as pd
+from datetime import datetime
+
 
 class Test:
     def __init__ (self):
@@ -47,6 +50,42 @@ class Test:
 
         data['Portfolio Value'] = portfolio_value
         return data['Portfolio Value'].iloc[-1], data
+    
+    def backtest_signals_date(data, date_str, initial_capital=10000, risk_per_trade=1.0):
+        cash = initial_capital
+        position = 0
+        portfolio_value = []
+        date = pd.to_datetime(date_str)
+        count_trades = 0
+        current_value = cash  # Valor inicial do portfólio
+
+        for index, row in data.iterrows():
+            # Manter o valor inicial até a data especificada
+            if pd.to_datetime(row['date']) < date:
+                portfolio_value.append(current_value)
+                continue
+
+            # Realizar trades quando a data é maior ou igual à data especificada
+            count_trades = count_trades + 1
+            buy_price = row['close'] * 1.01  # Inclui slippage
+            sell_price = row['close'] * 0.99  # Inclui slippage
+            amount_to_risk = cash * risk_per_trade
+
+            if row['action'] == 'Buy' and cash > 0:
+                shares_to_buy = amount_to_risk / buy_price
+                position += shares_to_buy
+                cash -= shares_to_buy * buy_price
+
+            elif row['action'] == 'Sell' and position > 0:
+                cash += position * sell_price
+                position = 0
+
+            current_value = cash + position * row['close']
+            portfolio_value.append(current_value)
+
+        # Garantir que a lista portfolio_value tenha o mesmo comprimento que o DataFrame data
+        data['Portfolio Value'] = portfolio_value
+        return data['Portfolio Value'].iloc[-1], data, count_trades
 
     def backtest_signals_SL_TP(data, initial_capital=10000, risk_per_trade=0.02, stop_loss_percent=0.05, take_profit_percent=0.10):
         cash = initial_capital

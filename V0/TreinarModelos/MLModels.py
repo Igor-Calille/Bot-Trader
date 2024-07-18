@@ -1,12 +1,15 @@
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
-from sklearn.model_selection import train_test_split, TimeSeriesSplit, GridSearchCV
+from sklearn.model_selection import train_test_split, TimeSeriesSplit, GridSearchCV, RandomizedSearchCV
+from scipy.stats import randint
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout, GRU, Bidirectional
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
+
+import xgboost as xgb
 
 class using_RandomForestRegressor():
     def __init__(self):
@@ -21,14 +24,45 @@ class using_RandomForestRegressor():
     def GridSearchCV_RandomForestRegressor(X,y):
         tscv = TimeSeriesSplit(n_splits=5)
         model = RandomForestRegressor(random_state=42)
+
+        
         param_search = {
-            'n_estimators': [50, 100, 200],
+            'n_estimators': [50, 100, 200, 300],
             'max_features': ['auto', 'sqrt', 'log2'],
-            'max_depth': [None, 10, 20, 30]
+            'max_depth': [None, 10, 20, 30, 40],
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 4],
+            'bootstrap': [True, False]
         }
-        gsearch = GridSearchCV(estimator=model, cv=tscv, param_grid=param_search)
+
+        #param_search = {
+            #'n_estimators': [50, 100, 200],
+            #'max_features': ['auto', 'sqrt', 'log2'],
+            #'max_depth': [None, 10, 20, 30]
+        #}
+
+        gsearch = GridSearchCV(estimator=model, cv=tscv, param_grid=param_search, scoring='neg_mean_squared_error', n_jobs=-1, verbose=2)
         gsearch.fit(X, y)
         best_model = gsearch.best_estimator_
+
+        return best_model
+    
+    def RandomizedSearchCV_RandomForestRegressor(X, y):
+        tscv = TimeSeriesSplit(n_splits=5)
+        model = RandomForestRegressor(random_state=42)
+
+        param_distributions = {
+            'n_estimators': randint(50, 500),
+            'max_features': ['auto', 'sqrt', 'log2'],
+            'max_depth': randint(10, 100),
+            'min_samples_split': randint(2, 11),
+            'min_samples_leaf': randint(1, 5),
+            'bootstrap': [True, False]
+        }
+
+        rsearch = RandomizedSearchCV(estimator=model, cv=tscv, param_distributions=param_distributions, scoring='neg_mean_squared_error', n_jobs=-1, n_iter=100, verbose=2, random_state=42)
+        rsearch.fit(X, y)
+        best_model = rsearch.best_estimator_
 
         return best_model
     

@@ -54,7 +54,7 @@ class BOTS:
         #print(backtest_results[['Close', 'action', 'Portfolio Value']].tail())
 
 
-    def BOT_main(stocks, model_type:int, media_movel:Union[List[int], None]=None, rsi=False, bollinger=False):
+    def BOT_main(stocks, model_type:int, media_movel:Union[List[int], None]=None, rsi=False, bollinger=False, lags=False):
 
         #Criação das features e targets para o treinamento do modelo e comparação dos resultados
         stocks['target'] = stocks['close'].shift(-1)
@@ -85,22 +85,23 @@ class BOTS:
 
 
         # Lag Features
-        lags = [1, 2, 3]
-        for lag in lags:
-            stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
-            features.append(f'lag_{lag}')
+        if lags:
+            lags = [1, 2, 3, 4, 5]
+            for lag in lags:
+                stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
+                features.append(f'lag_{lag}')
 
         # Remove valores nulos
         stocks.dropna(inplace=True)
 
         # Escalonamento dos dados
-        scaler = StandardScaler()
-        X = scaler.fit_transform(stocks[features])
-        y = stocks['target'].values
+        #scaler = StandardScaler()
+        #X = scaler.fit_transform(stocks[features])
+        #y = stocks['target'].values
 
 
-        #X = stocks[features]
-        #y = stocks['target']
+        X = stocks[features]
+        y = stocks['target']
 
 
         #Treinamento do modelo de acordo com o modelo escolhido
