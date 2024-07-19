@@ -58,7 +58,9 @@ class BOTS:
 
         #Criação das features e targets para o treinamento do modelo e comparação dos resultados
         stocks['target'] = stocks['close'].shift(-1)
-        features = ['open', 'high', 'low', 'close', 'tick_volume']
+        #features = ['open', 'high', 'low', 'close', 'tick_volume']
+        features = ['open', 'high', 'low', 'close', 'volume', 'adj_close']
+
 
 
         #Calculo de Médias Moveis

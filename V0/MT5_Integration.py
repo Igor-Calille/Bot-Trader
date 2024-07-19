@@ -4,6 +4,7 @@ import pytz
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import yfinance as yf
 
 from TreinarModelos.Merge import BOTS
 from TreinarModelos.Test import Test
@@ -11,14 +12,14 @@ from TreinarModelos.View import View
 
 
 
-def get_data_MT5():
+def get_data_MT5(symbol = "APPLE"):
     #Inicializar o MetaTrader 5
     if not mt5.initialize():
         print('falha na inicialização, erro=', mt5.last_error())
         quit()
 
     #Variáveis de operação
-    symbol = "APPLE"
+    
     timezone = pytz.timezone("Etc/UTC")# MetaTrader 5 server timezone
     from_date = datetime(2020,1,1,tzinfo=timezone)
     to_date = datetime.now(pytz.utc)
@@ -37,11 +38,32 @@ def get_data_MT5():
 
     return rates_df
 
-def get_data_yfinance():
+def get_data_yfinance(symbol="AAPL"):
+    timezone = pytz.timezone("Etc/UTC")
+    from_date = "2020-01-01"
+    to_date = datetime.now(pytz.utc).strftime("%Y-%m-%d")
+
+    # Obter stocks
+    data = yf.download(symbol, start=from_date, end=to_date)
+
+    if data.empty:
+        print('Falha no acesso dos dados históricos.')
+    else:
+        print(f'Dados obtidos, total de linhas: {len(data)}')
+
+    # Processar os dados
+    data.reset_index(inplace=True)
+    data = data.rename(columns={'Date': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume', 'Adj Close': 'adj_close'})
+
+    return data
+
+rates_df = get_data_yfinance("BTC-USD")
 
 
+print(rates_df.head())
 
-predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[17,72], rsi=True, bollinger=True, lags=False)
+
+predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[17,72], rsi=True, bollinger=True, lags=True)
 
 
 
@@ -65,7 +87,10 @@ print('\n')
 
 
 initial_value = 10000
-final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2023-07-16', initial_value)
+count_trades=999
+final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-06-06', initial_value)
+#final_value, backtest_results = Test.backtest_signals(predicted_stocks, initial_value)
+
 print(f"Valor inicial da carteira: ${initial_value}")
 print(f"Valor final da carteira: ${final_value:.2f}")
 print(f"Quantidade de trades: {count_trades}")
