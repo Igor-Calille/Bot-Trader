@@ -11,7 +11,7 @@ from TreinarModelos.Test import Test
 from TreinarModelos.View import View
 
 
-
+# Função para obter os dados do MetaTrader 5~
 def get_data_MT5(symbol = "APPLE"):
     #Inicializar o MetaTrader 5
     if not mt5.initialize():
