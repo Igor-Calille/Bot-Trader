@@ -40,11 +40,11 @@ def get_data_MT5(symbol = "APPLE"):
 
 def get_data_yfinance(symbol="AAPL"):
     timezone = pytz.timezone("Etc/UTC")
-    from_date = "2020-01-01"
+    from_date = "2018-01-01"
     to_date = datetime.now(pytz.utc).strftime("%Y-%m-%d")
 
     # Obter stocks
-    data = yf.download(symbol, start=from_date, end=to_date)
+    data = yf.download(symbol, start=from_date)
 
     if data.empty:
         print('Falha no acesso dos dados históricos.')
@@ -54,16 +54,37 @@ def get_data_yfinance(symbol="AAPL"):
     # Processar os dados
     data.reset_index(inplace=True)
     data = data.rename(columns={'Date': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume', 'Adj Close': 'adj_close'})
+    #data = data.rename(columns={'Datetime': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume', 'Adj Close': 'adj_close'})
+
 
     return data
 
-rates_df = get_data_yfinance("BTC-USD")
+def get_data_yfinance_H(symbol="AAPL"):
+    data = yf.download(symbol, interval="1h")
+
+    data_H = data.resample('2H').agg({
+        'Open': 'first',
+        'High': 'max',
+        'Low': 'min',
+        'Close': 'last',
+        'Volume': 'sum'
+    })
+
+    data_H = data_H.dropna()
+
+    data_H.reset_index(inplace=True)
+    data_H = data_H.rename(columns={'Datetime': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume', 'Adj Close': 'adj_close'})
+
+    return data_H
+
+rates_df = get_data_yfinance()
 
 
 print(rates_df.head())
 
 
-predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[17,72], rsi=True, bollinger=True, lags=True)
+
+predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[17,72], rsi=True, bollinger=True, lags=False)
 
 
 
@@ -88,7 +109,9 @@ print('\n')
 
 initial_value = 10000
 count_trades=999
-final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-06-06', initial_value)
+#YYYY-MM-DD
+final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-06-23', initial_value)
+#final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-07-10 00:00:00-00:00', initial_value)
 #final_value, backtest_results = Test.backtest_signals(predicted_stocks, initial_value)
 
 print(f"Valor inicial da carteira: ${initial_value}")
@@ -156,3 +179,6 @@ elif decision == 'sell':
     '''
 
 mt5.shutdown()
+
+
+
