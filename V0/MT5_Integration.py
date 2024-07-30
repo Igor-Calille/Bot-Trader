@@ -40,7 +40,7 @@ def get_data_MT5(symbol = "APPLE"):
 
 def get_data_yfinance(symbol="AAPL"):
     timezone = pytz.timezone("Etc/UTC")
-    from_date = "2018-01-01"
+    from_date = "2020-01-01"
     to_date = datetime.now(pytz.utc).strftime("%Y-%m-%d")
 
     # Obter stocks
@@ -77,14 +77,17 @@ def get_data_yfinance_H(symbol="AAPL"):
 
     return data_H
 
-rates_df = get_data_yfinance()
+rates_df = get_data_yfinance_H("AAPL")
 
 
 print(rates_df.head())
 
 
-
-predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[17,72], rsi=True, bollinger=True, lags=False)
+#17,72
+#Média Móvel Simples (SMA) 5,10,20
+#Média Móvel Exponencial (EMA) 5,9,12
+#Média Móvel Ponderada (WMA) 5, 10
+predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[2,3,12], rsi=True, bollinger=True, lags=True)
 
 
 
@@ -110,8 +113,8 @@ print('\n')
 initial_value = 10000
 count_trades=999
 #YYYY-MM-DD
-final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-06-23', initial_value)
-#final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-07-10 00:00:00-00:00', initial_value)
+#final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2023-07-23', initial_value)
+final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-07-04 00:00:00-00:00', initial_value)
 #final_value, backtest_results = Test.backtest_signals(predicted_stocks, initial_value)
 
 print(f"Valor inicial da carteira: ${initial_value}")

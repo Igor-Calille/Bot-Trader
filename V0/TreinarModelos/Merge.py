@@ -13,9 +13,6 @@ from TreinarModelos.Test import Test
 from TreinarModelos.MLModels import using_RandomForestRegressor, using_LinearRidge, using_LNN
 
 
-#stocks = pd.read_csv('V0/AAPL_2020-01-01__2024-01-01.csv')
-#print(stocks)
-
 class BOTS:
     def __init__(self):
         pass
@@ -88,7 +85,7 @@ class BOTS:
 
         # Lag Features
         if lags:
-            lags = [1, 2, 3, 4, 5]
+            lags = [1,2]
             for lag in lags:
                 stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
                 features.append(f'lag_{lag}')
