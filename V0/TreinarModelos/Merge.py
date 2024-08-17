@@ -85,7 +85,7 @@ class BOTS:
 
         # Lag Features
         if lags:
-            lags = [1,2]
+            lags = [1,2,3]
             for lag in lags:
                 stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
                 features.append(f'lag_{lag}')
@@ -126,6 +126,9 @@ class BOTS:
             stocks['action'] = np.where(stocks['signal_ml'] > 0, 'Buy', 'Sell')
 
         return stocks
+    
+    def BOT_1(stocks, model_type:int):
+        pass
 
 
 

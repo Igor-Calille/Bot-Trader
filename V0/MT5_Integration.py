@@ -77,7 +77,7 @@ def get_data_yfinance_H(symbol="AAPL"):
 
     return data_H
 
-rates_df = get_data_yfinance_H("AAPL")
+rates_df = get_data_yfinance("AAPL")
 
 
 print(rates_df.head())
@@ -87,7 +87,7 @@ print(rates_df.head())
 #Média Móvel Simples (SMA) 5,10,20
 #Média Móvel Exponencial (EMA) 5,9,12
 #Média Móvel Ponderada (WMA) 5, 10
-predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[2,3,12], rsi=True, bollinger=True, lags=True)
+predicted_stocks = BOTS.BOT_main(rates_df, 'RandomForestRegressor_GridSearchCV', media_movel=[5,10,20], rsi=True, bollinger=True, lags=False)
 
 
 
@@ -114,8 +114,10 @@ initial_value = 10000
 count_trades=999
 #YYYY-MM-DD
 #final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2023-07-23', initial_value)
-final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2024-07-04 00:00:00-00:00', initial_value)
+final_value, backtest_results, count_trades = Test.backtest_signals_date(predicted_stocks,'2023-08-16', initial_value)
 #final_value, backtest_results = Test.backtest_signals(predicted_stocks, initial_value)
+
+
 
 print(f"Valor inicial da carteira: ${initial_value}")
 print(f"Valor final da carteira: ${final_value:.2f}")
@@ -137,6 +139,8 @@ axs[0].text(1, 0.35, "Teste")
 
 plt.tight_layout()
 plt.show()
+
+
 
 
 
