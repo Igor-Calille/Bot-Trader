@@ -51,7 +51,18 @@ class BOTS:
         #print(backtest_results[['Close', 'action', 'Portfolio Value']].tail())
 
 
-    def BOT_main(stocks, model_type:int, media_movel:Union[List[int], None]=None, rsi=False, bollinger=False, lags=False):
+    def BOT_main(
+            stocks, 
+            model_type:int, 
+            media_movel:Union[List[int], None]=None, 
+            media_movel_exponencial:Union[List[int], None]=None,
+            media_movel_ponderada:Union[List[int], None]=None,
+            media_movel_kaufman:Union[List[int], None]=None,
+            media_movel_hull:Union[List[int], None]=None,
+            media_movel_triangular:Union[List[int], None]=None,
+            rsi=False, 
+            bollinger=False, 
+            lags=False):
 
         #Criação das features e targets para o treinamento do modelo e comparação dos resultados
         stocks['target'] = stocks['close'].shift(-1)
@@ -68,6 +79,46 @@ class BOTS:
                 for i in media_movel:
                     stocks[f'SMA_{i}'] = Indicadores.Media_movel(stocks['close'], window=i)
                     features.append(f'SMA_{i}')
+        
+        if media_movel_exponencial is not None:
+            if not isinstance(media_movel_exponencial, list):
+                raise ValueError('media_movel_exponencial precisa ser uma lista')
+            else:
+                for i in media_movel_exponencial:
+                    stocks[f'EMA_{i}'] = Indicadores.media_movel_exponecial(stocks['close'], window=i)
+                    features.append(f'EMA_{i}')
+
+        if media_movel_ponderada is not None:
+            if not isinstance(media_movel_ponderada, list):
+                raise ValueError('media_movel_ponderada precisa ser uma lista')
+            else:
+                for i in media_movel_ponderada:
+                    stocks[f'WMA_{i}'] = Indicadores.media_movel_ponderada(stocks['close'], window=i)
+                    features.append(f'WMA_{i}')
+        
+        if media_movel_kaufman is not None:
+            if not isinstance(media_movel_kaufman, list):
+                raise ValueError('media_movel_kaufman precisa ser uma lista')
+            else:
+                for i in media_movel_kaufman:
+                    stocks[f'KAMA_{i}'] = Indicadores.media_movel_kaufman(stocks['close'], window=i)
+                    features.append(f'KAMA_{i}')
+        
+        if media_movel_hull is not None:
+            if not isinstance(media_movel_hull, list):
+                raise ValueError('media_movel_hull precisa ser uma lista')
+            else:
+                for i in media_movel_hull:
+                    stocks[f'HULL_{i}'] = Indicadores().media_movel_hull(stocks['close'], window=i)
+                    features.append(f'HULL_{i}')
+        
+        if media_movel_triangular is not None:
+            if not isinstance(media_movel_triangular, list):
+                raise ValueError('media_movel_triangular precisa ser uma lista')
+            else:
+                for i in media_movel_triangular:
+                    stocks[f'TRIANGULAR_{i}'] = Indicadores().media_movel_triangular(stocks['close'], window=i)
+                    features.append(f'TRIANGULAR_{i}')
 
         #Calculo de RSI
         if rsi:
@@ -85,7 +136,7 @@ class BOTS:
 
         # Lag Features
         if lags:
-            lags = [1,2,3]
+            lags = [1]
             for lag in lags:
                 stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
                 features.append(f'lag_{lag}')
