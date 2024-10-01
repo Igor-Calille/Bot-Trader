@@ -38,6 +38,7 @@ def get_data_MT5(symbol = "APPLE"):
 
     return rates_df
 
+#
 def get_data_yfinance(symbol="AAPL"):
     timezone = pytz.timezone("Etc/UTC")
     from_date = "2019-01-01"
