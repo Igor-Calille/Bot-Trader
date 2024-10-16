@@ -62,7 +62,9 @@ class BOTS:
             media_movel_triangular:Union[List[int], None]=None,
             rsi=False, 
             bollinger=False, 
-            lags=False):
+            lags=False,
+            MACD=False
+            ):
 
         #Criação das features e targets para o treinamento do modelo e comparação dos resultados
         stocks['target'] = stocks['close'].shift(-1)
@@ -140,6 +142,12 @@ class BOTS:
             for lag in lags:
                 stocks[f'lag_{lag}'] = stocks['close'].shift(lag)
                 features.append(f'lag_{lag}')
+
+        if MACD:
+            macd_histogram = Indicadores().compute_MACD(stocks['close'], short_window=12, long_window=26, signal_window=9)
+            stocks['macd_histogram'] = macd_histogram
+            features.append('macd_histogram')
+            
 
         # Remove valores nulos
         stocks.dropna(inplace=True)
