@@ -8,6 +8,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout, GRU, Bidirectional
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 import xgboost as xgb
 
@@ -16,6 +18,7 @@ class using_RandomForestRegressor():
         pass
 
     def normal_split_RandomForestRegressor(X,y):
+        # Errado para dados temporais
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         model = RandomForestRegressor(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
@@ -47,22 +50,26 @@ class using_RandomForestRegressor():
 
         return best_model
     
-    def RandomizedSearchCV_RandomForestRegressor(X, y):
-        tscv = TimeSeriesSplit(n_splits=5)
-        model = RandomForestRegressor(random_state=42)
+    
+class using_LinearRegression():
+    def __init__(self):
+        pass
 
-        param_distributions = {
-            'n_estimators': randint(50, 500),
-            'max_features': ['auto', 'sqrt', 'log2'],
-            'max_depth': randint(10, 100),
-            'min_samples_split': randint(2, 11),
-            'min_samples_leaf': randint(1, 5),
-            'bootstrap': [True, False]
+    def GridSearchCV_LinearRegression(X,y):
+        tscv = TimeSeriesSplit(n_splits=5)
+
+        model = LinearRegression()
+
+        param_search = {
+            'fit_intercept': [True, False],
+            'normalize': [True, False]
         }
 
-        rsearch = RandomizedSearchCV(estimator=model, cv=tscv, param_distributions=param_distributions, scoring='neg_mean_squared_error', n_jobs=-1, n_iter=100, verbose=2, random_state=42)
-        rsearch.fit(X, y)
-        best_model = rsearch.best_estimator_
+        gsearch = GridSearchCV(estimator=model, param_grid=param_search, cv=tscv, scoring='neg_mean_squared_error')
+
+        gsearch.fit(X,y)
+
+        best_model = gsearch.best_estimator_
 
         return best_model
     
@@ -132,3 +139,20 @@ class using_LNN():
             model.fit(X_train, y_train, epochs=500, batch_size=32, validation_data=(X_val, y_val), callbacks=[reduce_lr, early_stopping])
 
         return model
+
+
+def evaluate_models(model, data, X_test, y_test):
+    y_pred = model.predict(X_test)
+    data['predicted_price'] = y_pred
+
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    results={
+            'MSE': mse,
+            'MAE': mae,
+            'R²': r2
+        }
+    
+    return results, data

@@ -40,8 +40,8 @@ def get_data_MT5(symbol = "APPLE"):
 
 def get_data_yfinance(symbol="AAPL"):
     timezone = pytz.timezone("Etc/UTC")
-    from_date = "2019-01-01"
-    to_date = datetime.now(pytz.utc).strftime("%Y-%m-%d")
+    from_date = "2015-01-01"
+    to_date = 2023-12-31
 
     # Obter stocks
     data = yf.download(symbol, start=from_date)

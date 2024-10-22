@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from TreinarModelos.IndicadoresMercado import Indicadores
 from TreinarModelos.Test import Test
-from TreinarModelos.MLModels import using_RandomForestRegressor, using_LinearRidge, using_LNN
+from TreinarModelos.MLModels import using_RandomForestRegressor, using_LinearRidge, using_LNN, evaluate_models
 
 
 class BOTS:
@@ -164,6 +164,7 @@ class BOTS:
 
         #Treinamento do modelo de acordo com o modelo escolhido
         model = BOTS.setup_and_train_model(model_type, X, y)
+
 
         #fazer previões
         stocks['predicted_price'] = model.predict(X)
