@@ -48,7 +48,7 @@ class using_RandomForestRegressor():
         gsearch.fit(X, y)
         best_model = gsearch.best_estimator_
 
-        return best_model
+        return best_model, tscv
     
     
 class using_LinearRegression():
@@ -71,7 +71,7 @@ class using_LinearRegression():
 
         best_model = gsearch.best_estimator_
 
-        return best_model
+        return best_model, tscv
     
 class using_LinearRidge():
     def __init__(self):
@@ -141,18 +141,36 @@ class using_LNN():
         return model
 
 
-def evaluate_models(model, data, X_test, y_test):
-    y_pred = model.predict(X_test)
-    data['predicted_price'] = y_pred
+def cross_val_evaluate(model, data, X, y, tscv):
+    mse_scores = []
+    mae_scores = []
+    r2_scores = []
 
-    mse = mean_squared_error(y_test, y_pred)
-    mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
+    # Validação cruzada com TimeSeriesSplit
+    for train_index, test_index in tscv.split(X):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
 
-    results={
-            'MSE': mse,
-            'MAE': mae,
-            'R²': r2
-        }
-    
-    return results, data
+        # Treina o modelo
+        model.fit(X_train, y_train)
+
+        # Faz previsões
+        y_pred = model.predict(X_test)
+        data['predicted_price'] = y_pred
+
+        # Calcula as métricas
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+
+        # Armazena os resultados
+        mse_scores.append(mse)
+        mae_scores.append(mae)
+        r2_scores.append(r2)
+
+    # Calcula as médias das métricas para todos os folds
+    avg_mse = np.mean(mse_scores)
+    avg_mae = np.mean(mae_scores)
+    avg_r2 = np.mean(r2_scores)
+
+    return data, avg_mse, avg_mae, avg_r2

@@ -16,6 +16,7 @@ def main():
         )
 
 
+
 def get_data_yfinance(symbol="AAPL"):
     from_date = "2015-01-02"
     to_date = "2023-12-28"
