@@ -4,7 +4,7 @@ class Indicadores:
     def __init__ (self):
         pass
 
-    def compute_RSI(stocks_close, window=14):
+    def compute_RSI(self, stocks_close, window=14):
         diff = stocks_close.diff(1).dropna()
         gain = (diff.where(diff > 0, 0)).rolling(window=window).mean()
         loss = (-diff.where(diff <0,0)).rolling(window=window).mean()
@@ -61,6 +61,15 @@ class Indicadores:
         macd_histogram = macd_line - signal_line
 
         return macd_histogram
+    
+    def get_stochastic_rsi(self, data_value, window=14, stochastic_window=14):
+        rsi = self.compute_RSI(data_value, window)
+
+        min_rsi = rsi.rolling(window=stochastic_window).min()
+        max_rsi = rsi.rolling(window=stochastic_window).max()
+        stochastica_rsi = (rsi - min_rsi) / (max_rsi - min_rsi)
+
+        return stochastica_rsi
     
 
 
